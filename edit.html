@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <nav>
+        <a href="/">Home</a>
+        <a href="/create">Create Listing</a>
+        <a href="/auth">Profile</a>
+        <a href="/logout">Logout</a>
+    </nav>
+    <div class="tiny-form-cave">
+        <h1>Edit Listing</h1>
+        <form id="edit-form" method="POST">
+            <input type="text" name="title" id="title" placeholder="Title" required>
+            <textarea name="description" id="description" placeholder="Description" required></textarea>
+            <input type="number" name="price" id="price" placeholder="Price" required>
+            <input type="text" name="category" id="category" placeholder="Category" required>
+            <input type="text" name="phone" id="phone" placeholder="Phone" required>
+            <button type="submit">Save</button>
+        </form>
+    </div>
+
+    <script>
+        async function loadForEdit() {
+            const parts = location.pathname.split('/');
+            const id = parts[parts.length - 1];
+            try {
+                const res = await fetch('/listing/' + id);
+                if (!res.ok) return location.href = '/';
+                const item = await res.json();
+                document.getElementById('title').value = item.coolName || item.title || '';
+                document.getElementById('description').value = item.blahBlah || item.description || '';
+                document.getElementById('price').value = item.moneyNumber || item.price || '';
+                document.getElementById('category').value = item.ringRing || item.category || '';
+                document.getElementById('phone').value = item.phone || '';
+                document.getElementById('edit-form').action = '/edit/' + id;
+            } catch (e) {
+                console.error(e);
+                location.href = '/';
+            }
+        }
+        loadForEdit();
+    </script>
+</body>
+</html>

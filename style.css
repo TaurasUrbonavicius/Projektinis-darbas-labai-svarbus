@@ -1,0 +1,265 @@
+body {
+    margin: 0;
+    background: #1a1a1a;
+    color: white;
+    font-family: Arial;
+}
+
+nav {
+    background: #242424;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #444;
+}
+
+.nav-left, .nav-right {
+    display: flex;
+    gap: 20px;
+}
+
+nav a {
+    color: #cfcfcf;
+    text-decoration: none;
+    transition: 0.2s;
+}
+
+nav a:hover {
+    color: white;
+}
+
+.active {
+    color: #8f7cff;
+}
+
+.hero {
+    text-align: center;
+    padding: 60px;
+    background: linear-gradient(to right, #222, #37375c);
+}
+
+.listings {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 30px;
+}
+
+.listing-card {
+    height: 350px;
+    border-radius: 8px;
+    position: relative;
+    overflow: visible;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.listing-card:hover {
+    transform: scale(1.05);
+}
+
+.listing-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 20px;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.listing-card-content {
+    color: white;
+}
+
+.listing-card-content h3 {
+    margin: 0 0 10px 0;
+    font-size: 20px;
+}
+
+.listing-card-content .price {
+    margin: 0 0 15px 0;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.show-more-btn {
+    background: #4b4b88;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background 0.2s;
+    width: 100%;
+}
+
+.show-more-btn:hover {
+    background: #6b6bb8;
+}
+
+.listing-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2000;
+}
+
+.listing-modal.show {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.modal-content {
+    position: relative;
+    background: #2a2a2a;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 700px;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 32px;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.modal-image {
+    width: 100%;
+    height: 300px;
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-color: #1a1a1a;
+}
+
+.modal-info {
+    padding: 30px;
+}
+
+.modal-info h2 {
+    margin: 0 0 15px 0;
+}
+
+.modal-info .price {
+    font-size: 22px;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.modal-info .description {
+    margin: 15px 0;
+    line-height: 1.6;
+}
+
+.modal-actions {
+    margin-top: 20px;
+    display: flex;
+    gap: 10px;
+}
+
+.modal-actions a {
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 4px;
+    cursor: pointer;
+    display: inline-block;
+    transition: background 0.2s;
+}
+
+.modal-actions .btn {
+    background: #4b4b88;
+    color: white;
+}
+
+.modal-actions .btn:hover {
+    background: #6b6bb8;
+}
+
+.modal-actions .delete-btn {
+    background: #8b4545;
+}
+
+.modal-actions .delete-btn:hover {
+    background: #ab5555;
+}
+
+.spaceItems {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.card {
+    background: #2a2a2a;
+    border: 1px solid #444;
+    padding: 20px;
+}
+
+.card a, button {
+    background: #4b4b88;
+    color: white;
+    padding: 10px;
+    border: none;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.weird-login-zone {
+    display: flex;
+    min-height: 80vh;
+}
+
+.left, .right {
+    width: 50%;
+    padding: 40px;
+}
+
+.tiny-form-cave, .human-corner {
+    padding: 40px;
+}
+
+input, textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    background: #333;
+    border: 1px solid #555;
+    color: white;
+}
+
+.delete {
+    background: darkred;
+    padding: 10px;
+    text-decoration: none;
+    color: white;
+}

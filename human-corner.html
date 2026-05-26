@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-left">
+            <a href="/">Home</a>
+            <a href="/create">Create Listing</a>
+            <a class="active" href="/human-corner">Profile</a>
+        </div>
+        <div class="nav-right">
+            <a href="/logout">Logout</a>
+        </div>
+    </nav>
+    <div class="human-corner">
+        <h1>Your Profile</h1>
+        <form action="/update-human-corner" method="POST">
+            <input type="text" name="name" id="name-input" placeholder="Name">
+            <input type="email" name="email" id="email-input" placeholder="Email">
+            <input type="password" name="password" placeholder="New Password (leave blank to keep current)">
+            <button type="submit">Update Profile</button>
+        </form>
+        <p id="created">Created: </p>
+        <p id="days">Days Since Creation: </p>
+        <h2>Your Listings</h2>
+        <div id="my-listings" class="listings"></div>
+        <button id="delete-account" class="delete">Delete Account</button>
+    </div>
+    
+    <div id="listingModal" class="listing-modal">
+        <div class="modal-overlay" onclick="closeListingModal()"></div>
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeListingModal()">×</button>
+            <div id="modalImage" class="modal-image"></div>
+            <div class="modal-info">
+                <h2 id="modalTitle"></h2>
+                <p id="modalPrice" class="price"></p>
+                <p id="modalCategory"></p>
+                <p id="modalDescription" class="description"></p>
+                <p id="modalPhone" class="phone"></p>
+                <div id="modalEditDelete" class="modal-actions"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentUser = null;
+
+        async function getCurrentUser() {
+            try {
+                const res = await fetch('/me');
+                if (res.ok) {
+                    const data = await res.json();
+                    currentUser = data.user;
+                }
+            } catch (e) {}
+        }
+
+        function escapeHtml(str) {
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        async function openListingModal(listingId) {
+            try {
+                const res = await fetch('/listing/' + listingId);
+                if (!res.ok) return;
+                const item = await res.json();
+                
+                const coolName = item.coolName || item.title || '';
+                const blahBlah = item.blahBlah || item.description || '';
+                const moneyNumber = item.price || item.moneyNumber || '';
+                const ringRing = item.category || item.ringRing || '';
+                const phone = item.phone || '';
+                
+                const modal = document.getElementById('listingModal');
+                document.getElementById('modalImage').style.backgroundImage = item.image ? `url('${item.image}')` : 'none';
+                document.getElementById('modalTitle').textContent = coolName;
+                document.getElementById('modalPrice').textContent = moneyNumber + ' €';
+                document.getElementById('modalCategory').textContent = 'Category: ' + escapeHtml(ringRing);
+                document.getElementById('modalDescription').textContent = blahBlah;
+                document.getElementById('modalPhone').textContent = 'Phone: ' + escapeHtml(phone);
+                
+                const editDeleteDiv = document.getElementById('modalEditDelete');
+                editDeleteDiv.innerHTML = `
+                    <a href="/edit/${item.id}" class="btn">Edit</a>
+                    <a href="/delete/${item.id}" class="btn delete-btn" onclick="return confirm('Delete this listing?')">Delete</a>
+                `;
+                
+                modal.classList.add('show');
+            } catch (e) {
+                console.error('Failed to open listing', e);
+            }
+        }
+
+        function closeListingModal() {
+            document.getElementById('listingModal').classList.remove('show');
+        }
+
+        async function loadProfile() {
+            try {
+                const meRes = await fetch('/me');
+                if (!meRes.ok) { 
+                    throw new Error('Not logged in'); 
+                }
+                const me = await meRes.json();
+                currentUser = me.user;
+                
+                // Prefill the form with current user data
+                document.getElementById('name-input').value = me.user.name || '';
+                document.getElementById('email-input').value = me.user.email || '';
+                
+                document.getElementById('created').textContent = 'Created: ' + new Date(me.created).toLocaleString();
+                document.getElementById('days').textContent = 'Days Since Creation: ' + me.days;
+                const listRes = await fetch('/my-listings');
+                const items = await listRes.json();
+                const container = document.getElementById('my-listings');
+                container.innerHTML = '';
+                items.forEach(i => {
+                    const coolName = i.coolName || i.title || '';
+                    const moneyNumber = i.price || i.moneyNumber || '';
+                    
+                    const div = document.createElement('div');
+                    div.className = 'listing-card';
+                    div.style.backgroundImage = i.image ? `url('${i.image}')` : 'none';
+                    div.style.backgroundSize = 'cover';
+                    div.style.backgroundPosition = 'center';
+                    
+                    const bgOverlay = document.createElement('div');
+                    bgOverlay.className = 'listing-overlay';
+                    
+                    const content = document.createElement('div');
+                    content.className = 'listing-card-content';
+                    content.innerHTML = `
+                        <h3>${escapeHtml(coolName)}</h3>
+                        <p class="price">${escapeHtml(moneyNumber)} €</p>
+                        <button class="show-more-btn" onclick="openListingModal(${i.id})">Show More</button>
+                    `;
+                    
+                    bgOverlay.appendChild(content);
+                    div.appendChild(bgOverlay);
+                    container.appendChild(div);
+                });
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        document.getElementById('delete-account').addEventListener('click', () => {
+            if (confirm('Are you sure you want to delete your account? This cannot be undone.')) {
+                window.location.href = '/delete-account';
+            }
+        });
+
+        getCurrentUser();
+        loadProfile();
+    </script>
+</body>
+</html>

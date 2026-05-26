@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Listing</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-left">
+            <a href="/">Home</a>
+            <a class="active" href="/create">Create Listing</a>
+            <a href="/human-corner">Profile</a>
+        </div>
+        <div class="nav-right">
+            <a href="/logout">Logout</a>
+        </div>
+    </nav>
+    <div class="tiny-form-cave">
+        <h1>Create Listing</h1>
+        <form action="/create" method="POST" enctype="multipart/form-data">
+            <input type="text" name="title" placeholder="Listing Name" required>
+            <input type="number" name="price" placeholder="Price In Euros" required>
+            <input type="text" name="category" placeholder="Category (car, bike, electronic...)" required>
+            <textarea name="description" placeholder="Description" required></textarea>
+            <input type="text" name="phone" placeholder="Phone Number" required>
+            <input type="file" name="image" accept="image/*">
+            <button type="submit">Create Listing</button>
+        </form>
+    </div>
+</body>
+</html>

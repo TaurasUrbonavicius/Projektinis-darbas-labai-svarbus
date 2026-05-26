@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skelbinukai</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <nav>
+        <div class="nav-left">
+            <a class="active" href="/">Home</a>
+            <a href="/create">Create Listing</a>
+            <a href="/human-corner">Profile</a>
+        </div>
+        <div class="nav-right">
+            <a id="auth-link" href="/auth">Login</a>
+        </div>
+    </nav>
+    <div class="hero">
+        <h1>Skelbinukai</h1>
+        <p>Buy and sell items</p>
+    </div>
+    <div class="listings"></div>
+    
+    <div id="listingModal" class="listing-modal">
+        <div class="modal-overlay" onclick="closeListingModal()"></div>
+        <div class="modal-content">
+            <button class="close-btn" onclick="closeListingModal()">×</button>
+            <div id="modalImage" class="modal-image"></div>
+            <div class="modal-info">
+                <h2 id="modalTitle"></h2>
+                <p id="modalPrice" class="price"></p>
+                <p id="modalCategory"></p>
+                <p id="modalDescription" class="description"></p>
+                <p id="modalPhone" class="phone"></p>
+                <div id="modalEditDelete" class="modal-actions"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
