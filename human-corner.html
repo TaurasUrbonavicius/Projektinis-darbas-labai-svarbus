@@ -29,6 +29,8 @@
         <p id="days">Days Since Creation: </p>
         <h2>Your Listings</h2>
         <div id="my-listings" class="listings"></div>
+        <h2>Saved Listings</h2>
+        <div id="saved-listings" class="listings"></div>
         <button id="delete-account" class="delete">Delete Account</button>
     </div>
     
@@ -121,7 +123,7 @@
                 
                 document.getElementById('created').textContent = 'Created: ' + new Date(me.created).toLocaleString();
                 document.getElementById('days').textContent = 'Days Since Creation: ' + me.days;
-                const listRes = await fetch('/my-listings');
+                        const listRes = await fetch('/my-listings');
                 const items = await listRes.json();
                 const container = document.getElementById('my-listings');
                 container.innerHTML = '';
@@ -134,6 +136,11 @@
                     div.style.backgroundImage = i.image ? `url('${i.image}')` : 'none';
                     div.style.backgroundSize = 'cover';
                     div.style.backgroundPosition = 'center';
+
+                    const star = document.createElement('button');
+                    star.className = 'save-star';
+                    star.innerHTML = '★';
+                    star.onclick = (ev) => { ev.stopPropagation(); toggleSaveProfile(i.id, star); };
                     
                     const bgOverlay = document.createElement('div');
                     bgOverlay.className = 'listing-overlay';
@@ -147,9 +154,51 @@
                     `;
                     
                     bgOverlay.appendChild(content);
+                    div.appendChild(star);
                     div.appendChild(bgOverlay);
                     container.appendChild(div);
                 });
+
+                // load saved listings
+                try {
+                    const savedRes = await fetch('/saved-listings');
+                    const savedItems = savedRes.ok ? await savedRes.json() : [];
+                    const savedContainer = document.getElementById('saved-listings');
+                    savedContainer.innerHTML = '';
+                    savedItems.forEach(i => {
+                        const coolName = i.coolName || i.title || '';
+                        const moneyNumber = i.price || i.moneyNumber || '';
+                        
+                        const div = document.createElement('div');
+                        div.className = 'listing-card';
+                        div.style.backgroundImage = i.image ? `url('${i.image}')` : 'none';
+                        div.style.backgroundSize = 'cover';
+                        div.style.backgroundPosition = 'center';
+
+                        const star = document.createElement('button');
+                        star.className = 'save-star filled';
+                        star.innerHTML = '★';
+                        star.onclick = (ev) => { ev.stopPropagation(); toggleSaveProfile(i.id, star); };
+
+                        const bgOverlay = document.createElement('div');
+                        bgOverlay.className = 'listing-overlay';
+                        
+                        const content = document.createElement('div');
+                        content.className = 'listing-card-content';
+                        content.innerHTML = `
+                            <h3>${escapeHtml(coolName)}</h3>
+                            <p class="price">${escapeHtml(moneyNumber)} €</p>
+                            <button class="show-more-btn" onclick="openListingModal(${i.id})">Show More</button>
+                        `;
+
+                        bgOverlay.appendChild(content);
+                        div.appendChild(star);
+                        div.appendChild(bgOverlay);
+                        savedContainer.appendChild(div);
+                    });
+                } catch(e) {
+                    console.error('Failed to load saved listings', e);
+                }
             } catch (e) {
                 console.error(e);
             }
@@ -163,6 +212,17 @@
 
         getCurrentUser();
         loadProfile();
+
+        async function toggleSaveProfile(id, btn) {
+            try {
+                const res = await fetch('/toggle-save/' + id, { method: 'POST' });
+                if (!res.ok) return;
+                const data = await res.json();
+                if (data.saved) btn.classList.add('filled'); else btn.classList.remove('filled');
+                // refresh profile lists
+                loadProfile();
+            } catch (e) { console.error(e); }
+        }
     </script>
 </body>
 </html>

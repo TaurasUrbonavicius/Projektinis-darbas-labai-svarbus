@@ -84,6 +84,16 @@ goofyBase.serialize(() => {
         )
     `);
 
+    // Saved listings: maps users to listings they've saved
+    goofyBase.run(`
+        CREATE TABLE IF NOT EXISTS savedListings (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            userId INTEGER,
+            listingId INTEGER,
+            UNIQUE(userId, listingId)
+        )
+    `);
+
 // Create default admin account if it doesn't exist
 // Admin credentials: email="admin", password="mypassword"
     goofyBase.get('SELECT * FROM users WHERE email=?', ['admin'], (err, user) => {
@@ -414,6 +424,44 @@ bananaApp.get('/my-listings', (req, res) => {
     });
 });
 
+// Toggle saved listing for current user
+bananaApp.post('/toggle-save/:id', (req, res) => {
+    if (!req.session.user) return res.status(401).json({ error: 'Not logged in' });
+    const listingId = req.params.id;
+    goofyBase.get('SELECT * FROM savedListings WHERE userId=? AND listingId=?', [req.session.user.id, listingId], (err, row) => {
+        if (err) return res.status(500).json({ error: 'DB error' });
+        if (row) {
+            goofyBase.run('DELETE FROM savedListings WHERE id=?', [row.id], function(err) {
+                if (err) return res.status(500).json({ error: 'DB error' });
+                res.json({ saved: false });
+            });
+        } else {
+            goofyBase.run('INSERT INTO savedListings(userId,listingId) VALUES(?,?)', [req.session.user.id, listingId], function(err) {
+                if (err) return res.status(500).json({ error: 'DB error' });
+                res.json({ saved: true });
+            });
+        }
+    });
+});
+
+// Get saved listings for current user
+bananaApp.get('/saved-listings', (req, res) => {
+    if (!req.session.user) return res.status(401).json([]);
+    goofyBase.all('SELECT s.* FROM spaceItems s JOIN savedListings sv ON sv.listingId=s.id WHERE sv.userId=? ORDER BY s.id DESC', [req.session.user.id], (err, items) => {
+        if (err) return res.status(500).json({ error: 'DB error' });
+        res.json(items);
+    });
+});
+
+// Get saved listing IDs for current user
+bananaApp.get('/saved-ids', (req, res) => {
+    if (!req.session.user) return res.status(200).json([]);
+    goofyBase.all('SELECT listingId FROM savedListings WHERE userId=?', [req.session.user.id], (err, rows) => {
+        if (err) return res.status(500).json({ error: 'DB error' });
+        res.json(rows.map(r => r.listingId));
+    });
+});
+
 // ==================== GET SINGLE LISTING ====================
 // Return details for a specific listing (JSON API for frontend modal)
 bananaApp.get('/listing/:id', (req, res) => {
@@ -441,6 +489,9 @@ bananaApp.get('/delete/:id', (req, res) => {
         });
     });
 });
+
+// serve a blank response for favicon requests to avoid noisy 404s
+bananaApp.get('/favicon.ico', (req, res) => res.status(204).end());
 
 // ==================== 404 ERROR HANDLER ====================
 // Catch-all for undefined routes

@@ -263,3 +263,26 @@ input, textarea {
     text-decoration: none;
     color: white;
 }
+
+.save-star {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #ffdd55;
+    color: #ffdd55;
+    background: transparent;
+    font-size: 18px;
+    cursor: pointer;
+    z-index: 5;
+}
+.save-star.filled {
+    background: #ffdd55;
+    color: #2a2a2a;
+}
+.save-star:focus { outline: none; }

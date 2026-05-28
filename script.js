@@ -13,29 +13,46 @@ async function getCurrentUser() {
     }
 }
 
-async function loadListings() {
+async function isLoggedIn() {
+    try {
+        const res = await fetch('/me');
+        if (res.ok) {
+            const data = await res.json();
+            currentUser = data.user;
+            return true;
+        }
+    } catch(e) {}
+    return false;
+}
+
+async function loadListings(query) {
     const listingsEl = document.querySelector('.listings');
     if (!listingsEl) return;
-
     try {
         const res = await fetch('/listings');
         const items = await res.json();
+        const loggedIn = await isLoggedIn();
+        const savedIds = loggedIn ? await (await fetch('/saved-ids')).json() : [];
         listingsEl.innerHTML = '';
-        items.forEach(i => {
+        const filtered = query ? items.filter(item => {
+            const name = (item.coolName || item.title || '').toLowerCase();
+            const desc = (item.blahBlah || item.description || '').toLowerCase();
+            const q = (query || '').toLowerCase();
+            return isSubsequence(q, name) || isSubsequence(q, desc);
+        }) : items;
+        filtered.forEach(i => {
             const coolName = i.coolName || i.title || '';
             const blahBlah = i.blahBlah || i.description || '';
             const moneyNumber = i.price || i.moneyNumber || '';
             const ringRing = i.category || i.ringRing || '';
-            
+        
             const el = document.createElement('div');
             el.className = 'listing-card';
             el.style.backgroundImage = i.image ? `url('${i.image}')` : 'none';
             el.style.backgroundSize = 'cover';
             el.style.backgroundPosition = 'center';
-            
             const bgOverlay = document.createElement('div');
             bgOverlay.className = 'listing-overlay';
-            
             const content = document.createElement('div');
             content.className = 'listing-card-content';
             content.innerHTML = `
@@ -43,8 +60,16 @@ async function loadListings() {
                 <p class="price">${escapeHtml(moneyNumber)} €</p>
                 <button class="show-more-btn" onclick="openListingModal(${i.id})">Show More</button>
             `;
-            
             bgOverlay.appendChild(content);
+
+// only show save star when logged in
+            if (loggedIn) {
+                const star = document.createElement('button');
+                star.className = 'save-star' + (savedIds.includes(i.id) ? ' filled' : '');
+                star.innerHTML = '★';
+                star.onclick = (ev) => { ev.stopPropagation(); toggleSave(i.id, star); };
+                el.appendChild(star);
+            }
             el.appendChild(bgOverlay);
             listingsEl.appendChild(el);
         });
@@ -60,6 +85,30 @@ function escapeHtml(str) {
         .replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
+}
+
+// simple subsequence matcher: 'tram' matches 'trampoline'
+function isSubsequence(q, s) {
+    if (!q) return false;
+    let i = 0, j = 0;
+    q = String(q).toLowerCase();
+    s = String(s).toLowerCase();
+    while (i < q.length && j < s.length) {
+        if (q[i] === s[j]) i++;
+        j++;
+    }
+    return i === q.length;
+}
+
+async function toggleSave(id, btn) {
+    try {
+        const res = await fetch('/toggle-save/' + id, { method: 'POST' });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.saved) btn.classList.add('filled'); else btn.classList.remove('filled');
+    } catch (e) {
+        console.error('Failed to toggle save', e);
+    }
 }
 
 async function openListingModal(listingId) {
